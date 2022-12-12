@@ -2,9 +2,11 @@
 # coding: utf-8
 
 # Simple script for charging battery when prices are low
-# In this scenario the battery will be charged when prices are x percent below the dialy average. The limit can be set by the lowChargeLimit variable. Default is 0.8, which means that charging will start when current price is 20% below the daily average. 
+# In this scenario the battery will be charged when prices are x percent below the dialy average. 
+# The limit can be set by the lowChargeLimit variable. 
+# Default is 0.8, which means that charging will start when current price is 20% below the daily average. 
 #
-# To get this script working you need to provide:
+# To get this script working you need to provide (best to edit the secret.py file):
 #  * vrmID
 #  * password
 #  * username
