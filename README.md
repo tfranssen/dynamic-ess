@@ -26,8 +26,9 @@ The goal of this project is to develop a feature for Victron Energy to take into
 ### Install
 
 1. Clone GIT project to local PC
+2. Install dependencies `pip3 install matplotlib numpy paho_mqtt pandas pytz requests`
 3. Configure `secret.py`
-2. Run script `python3 chargeWithoutPV.py` or add it to your crontab to schedule the script
+4. Run script `python3 chargeWithoutPV.py` or add it to your crontab to schedule the script
 
 ### Config
 
