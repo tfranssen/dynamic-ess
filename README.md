@@ -9,6 +9,7 @@ Work in progres.
 The goal of this project is to develop a feature for Victron Energy to take into account the dynamic tariff prices in the decision to store energy or to return energy to the grit. These dynamic tariff prices are nowadays offered by various energy providers (Easy Energy, ANWB, TIBR, and others) and are always announced a day in advance (also known as the day-ahead pricing model). The feature will control the grid setpoint as its main output.
 
 ### To do
+* Retrieve
 * Retrieve prices from multiple energy providers:
   * ~~ANWB~~ (done)
   * Easy Energy
