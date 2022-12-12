@@ -32,6 +32,21 @@ The goal of this project is to develop a feature for Victron Energy to take into
 
 ### Config
 
-Copy or rename the `secret.example.py` to `secret.py` and change it as you need it.
+1. Copy or rename the `secret.example.py` to `secret.py` and change it as you need it.
+2. Edit settings in script
+
+### Settings
+`lowChargeLimit` this is the threshold used to start charging. Default = 0.8, charging starts in this case 20% below daily average
+
+`dateToday` If 1, date is today, if 0 date is tomorrow, for testing only. Default is 1
+
+`tz` Time zone, default is: "Europe/Amsterdam"
+
+`plotImage` If 1 an image is plotted to show when charging will start
+
+`defaultGridSetpoint` Default grid point (Watt). Default setting is 30
+
+`chargingGridSetpoint` Charging grid point (Watt). Default setting is 3000
+
 
 
