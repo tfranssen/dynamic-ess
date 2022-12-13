@@ -37,17 +37,17 @@ The goal of this project is to develop a feature for Victron Energy to take into
 2. Edit settings in script
 
 ### Settings
-`lowChargeLimit` this is the threshold used to start charging. Default = 0.8, charging starts in this case 20% below daily average
+* `lowChargeLimit` this is the threshold used to start charging. Default = 0.8, charging starts in this case 20% below daily average
 
-`dateToday` If 1, date is today, if 0 date is tomorrow, for testing only. Default is 1
+* `dateToday` If 1, date is today, if 0 date is tomorrow, for testing only. Default is 1
 
-`tz` Time zone, default is: "Europe/Amsterdam"
+* `tz` Time zone, default is: "Europe/Amsterdam"
 
-`plotImage` If 1 an image is plotted to show when charging will start
+* `plotImage` If 1 an image is plotted to show when charging will start
 
-`defaultGridSetpoint` Default grid point (Watt). Default setting is 30
+* `defaultGridSetpoint` Default grid point (Watt). Default setting is 30
 
-`chargingGridSetpoint` Charging grid point (Watt). Default setting is 3000
+* `chargingGridSetpoint` Charging grid point (Watt). Default setting is 3000
 
 ### Schedule
 * Get prices is scheduled every day at 00:00:05.
