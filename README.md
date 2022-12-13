@@ -49,6 +49,8 @@ The goal of this project is to develop a feature for Victron Energy to take into
 
 * `chargingGridSetpoint` Charging grid point (Watt). Default setting is 3000
 
+* `provider` This selects the energy provider. 0 = ANWB, 1 = ENTSOE
+
 ### Schedule
 * Get prices is scheduled every day at 00:00:05.
 * The ESS controller is scheduled every 5 minutes. If the charge requirement did change an MQTT message will be published. Otherwise noting will happen.
