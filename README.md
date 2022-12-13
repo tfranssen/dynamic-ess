@@ -11,9 +11,9 @@ The goal of this project is to develop a feature for Victron Energy to take into
 ### To do
 * Retrieve prices from multiple energy providers:
   * ~~ANWB~~ (done)
+  * ~~ENTSOE API~~ (done)  
   * Easy Energy
   * TIBR
-  * ENTSOE API
 * ~~Plot chart~~ (done)
 * ~~ADD MQTT functionality through VRM~~ (done)
 * Implement multiple charge scenarios 
