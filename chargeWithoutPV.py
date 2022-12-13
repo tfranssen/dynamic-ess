@@ -71,7 +71,7 @@ client.tls_set("venus-ca.crt")
 client.username_pw_set(username, password)       
 
 # Declare logfile
-logzero.logfile("log.log")
+logzero.logfile("log.log", maxBytes=1e6, backupCount=3)
 
 # Calculate MQTT Broker URL
 
