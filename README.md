@@ -11,9 +11,9 @@ The goal of this project is to develop a feature for Victron Energy to take into
 ### To do
 * Retrieve prices from multiple energy providers:
   * ~~ANWB~~ (done)
+  * ~~ENTSOE API~~ (done)  
   * Easy Energy
   * TIBR
-  * ENTSOE API
 * ~~Plot chart~~ (done)
 * ~~ADD MQTT functionality through VRM~~ (done)
 * Implement multiple charge scenarios 
@@ -48,6 +48,8 @@ The goal of this project is to develop a feature for Victron Energy to take into
 * `defaultGridSetpoint` Default grid point (Watt). Default setting is 30
 
 * `chargingGridSetpoint` Charging grid point (Watt). Default setting is 3000
+
+* `provider` This selects the energy provider. 0 = ANWB, 1 = ENTSOE
 
 ### Schedule
 * Get prices is scheduled every day at 00:00:05.
