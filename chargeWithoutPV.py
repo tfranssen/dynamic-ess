@@ -183,7 +183,6 @@ logger.info("Script started.")
 logger.info("Get prices is scheduled every day at 00:00:05.")
 logger.info("The ESS controller is scheduled every 5 minutes.")
 
-
 getPrices()
 updateController()
 
