@@ -9,11 +9,11 @@ Work in progres.
 The goal of this project is to develop a feature for Victron Energy to take into account the dynamic tariff prices in the decision to store energy or to return energy to the grid. These dynamic tariff prices are nowadays offered by various energy providers (Easy Energy, ANWB, TIBR, and others) and are always announced a day in advance (also known as the day-ahead pricing model). The feature will control the grid setpoint as its main output.
 
 ### To do
-* Retrieve
 * Retrieve prices from multiple energy providers:
   * ~~ANWB~~ (done)
   * Easy Energy
   * TIBR
+  * ENTSOE API
 * ~~Plot chart~~ (done)
 * ~~ADD MQTT functionality through VRM~~ (done)
 * Implement multiple charge scenarios 
@@ -21,7 +21,8 @@ The goal of this project is to develop a feature for Victron Energy to take into
   * Always charge in X lowest tariff hours. (In this cases prices will be sorted in ascending order, first X hours will be used for charging)
   * Above scenario's including PV forecast. SoC will be lower in the morning so there is capacity left for PV charging. 
 * Rewrite script as service
-* Implement logging
+* ~~Implement logging~~ (done)
+* ~~Implement scheduler~~ (done)
   
 ### Install
 
@@ -48,5 +49,7 @@ The goal of this project is to develop a feature for Victron Energy to take into
 
 `chargingGridSetpoint` Charging grid point (Watt). Default setting is 3000
 
-
+### Schedule
+* Get prices is scheduled every day at 00:00:05.
+* The ESS controller is scheduled every 5 minutes. If the charge requirement did change an MQTT message will be published. Otherwise noting will happen.
 
