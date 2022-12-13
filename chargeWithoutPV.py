@@ -13,7 +13,7 @@
 #  
 #  Retrieving data is now only available for ANWB, other providers will be added later. 
 
-import requests, datetime, pytz, base64, time, logzero, schedule
+import requests, datetime, pytz, base64, time, logzero, schedule, xmltodict
 from datetime import datetime, timedelta
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -32,6 +32,7 @@ plotImage = 1 # If true image get created
 defaultGridSetpoint = 30 # Default grid point (Watt)
 chargingGridSetpoint = 3000 # Charging grid point (Watt)
 lastChargeCondition = 0
+provider = 1 #0 = ANWB, 1 = ENTSOE
 
 # Secrets
 # vrmID = "" # VRM ID, if not imported from secret.py put it here
@@ -81,45 +82,76 @@ def calculateBroker(vrmID):
     brokerURL = "mqtt{}.victronenergy.com".format(broker_index)
     return brokerURL
 
-# Retrieve ANWB prices
+# Retrieve prices
 def getPrices():
-    # Retrieve prices
-    global dfPrices, averagePrice
     if dateToday:
         dayString = "today"
     else:
         dayString = "tomorrow"
-    # Set dates of interest in correct format for API
-    fromDate = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
-    tillDate = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)+timedelta(days=1)-timedelta(seconds=1)
-    if dateToday == 0:
-        fromDate = fromDate+timedelta(days=1)
-        tillDate = tillDate+timedelta(days=1)
-    # Add time zone info to dates    
-    fromDateTZ = fromDate.astimezone(pytz.timezone(tz))
-    fromDateTZ = fromDateTZ.astimezone(pytz.utc)
-    tillDateTZ = tillDate.astimezone(pytz.timezone(tz))
-    tillDateTZ = tillDateTZ.astimezone(pytz.utc)
-    # Reformat dates for correct format for API
-    fromDateString = fromDateTZ.isoformat().replace("+00:00","Z")
-    tillDateString = tillDateTZ.isoformat().replace("+00:00","Z")
-    # Build API URL
-    url = "https://api.energyzero.nl/v1/energyprices?fromDate=" + fromDateString + "&tillDate=" + tillDateString + "&interval=4&usageType=1&inclBtw=true"
-    # Excecute API request
-    prices = requests.get(url)
-    pricesDoc = prices.json()
-    # Add prices to Pandas dataframe
-    dfPrices = pd.DataFrame.from_dict(pricesDoc["Prices"])
-    # Convert strings to datetime
-    dfPrices['readingDate'] = pd.to_datetime(dfPrices['readingDate'])
-    # Add timezone info to dates and calculate local times
-    dfPrices['localDate'] = dfPrices['readingDate'].dt.tz_convert(tz)
-    # Calculate average price
-    averagePrice = round(dfPrices["price"].mean()*100)/100
-    # Add column with charge condition based on lower limit.
-    dfPrices['chargeCondition'] = np.where((dfPrices['price'] < averagePrice*lowChargeLimit), True, False)
-    logger.info("Now prices retrieved for " + dayString)
-    logger.info("Average price is: €" + str(averagePrice))
+    #In case of ANWB
+    if provider == 0:
+        # Retrieve prices
+        global dfPrices, averagePrice
+        # Set dates of interest in correct format for API
+        fromDate = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
+        tillDate = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)+timedelta(days=1)-timedelta(seconds=1)
+        if dateToday == 0:
+            fromDate = fromDate+timedelta(days=1)
+            tillDate = tillDate+timedelta(days=1)
+        # Add time zone info to dates    
+        fromDateTZ = fromDate.astimezone(pytz.timezone(tz))
+        fromDateTZ = fromDateTZ.astimezone(pytz.utc)
+        tillDateTZ = tillDate.astimezone(pytz.timezone(tz))
+        tillDateTZ = tillDateTZ.astimezone(pytz.utc)
+        # Reformat dates for correct format for API
+        fromDateString = fromDateTZ.isoformat().replace("+00:00","Z")
+        tillDateString = tillDateTZ.isoformat().replace("+00:00","Z")
+        # Build API URL
+        url = "https://api.energyzero.nl/v1/energyprices?fromDate=" + fromDateString + "&tillDate=" + tillDateString + "&interval=4&usageType=1&inclBtw=true"
+        # Excecute API request
+        prices = requests.get(url)
+        pricesDoc = prices.json()
+        # Add prices to Pandas dataframe
+        dfPrices = pd.DataFrame.from_dict(pricesDoc["Prices"])
+        # Convert strings to datetime
+        dfPrices['readingDate'] = pd.to_datetime(dfPrices['readingDate'])
+        # Add timezone info to dates and calculate local times
+        dfPrices['localDate'] = dfPrices['readingDate'].dt.tz_convert(tz)
+        # Calculate average price
+        averagePrice = round(dfPrices["price"].mean()*100)/100
+        # Add column with charge condition based on lower limit.
+        dfPrices['chargeCondition'] = np.where((dfPrices['price'] < averagePrice*lowChargeLimit), True, False)
+        logger.info("Now prices retrieved for " + dayString)
+        logger.info("Average price is: €" + '%.2f' % averagePrice)
+    
+    # In case of ENTSOE
+    if provider == 1:
+        fromDate = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
+        tillDate = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)+timedelta(days=1)
+        if dateToday == 0:
+            fromDate = fromDate+timedelta(days=1)
+            tillDate = tillDate+timedelta(days=1)
+        fromDateTZ = fromDate.astimezone(pytz.timezone(tz))
+        fromDateTZ = fromDateTZ.astimezone(pytz.utc)
+        tillDateTZ = tillDate.astimezone(pytz.timezone(tz))
+        tillDateTZ = tillDateTZ.astimezone(pytz.utc)
+        fromDateString = fromDateTZ.strftime("%Y%m%d%H%M")
+        tillDateString = tillDateTZ.strftime("%Y%m%d%H%M")
+        url = "https://transparency.entsoe.eu/api?documentType=A44&in_Domain=10YNL----------L&out_Domain=10YNL----------L&periodStart="+fromDateString+"&periodEnd="+tillDateString+"&securityToken=7213ab85-4d23-4481-9dec-ae2bc2060592"
+        prices = requests.get(url)
+        dict_data = xmltodict.parse(prices.content)
+        dict_data["Publication_MarketDocument"]["TimeSeries"]["Period"]["Point"]
+        dfPrices = pd.DataFrame.from_dict(dict_data["Publication_MarketDocument"]["TimeSeries"]["Period"]["Point"])
+        dfPrices['localDate'] = pd.to_datetime(datetime.now().replace(microsecond=0, second=0, minute=0, hour=0), utc=True) + dfPrices.position.astype('timedelta64[h]')-timedelta(hours=2)
+        dfPrices['localDate'] = dfPrices['localDate'].dt.tz_convert(tz)
+        dfPrices = dfPrices.astype({"price.amount": float})
+        dfPrices['price.amount'] = dfPrices['price.amount'].div(1000).round(2)
+        dfPrices.rename(columns={'price.amount': 'price'}, inplace=True)
+        dfPrices.drop('position', axis=1, inplace=True)
+        averagePrice = round(dfPrices["price"].mean()*100)/100
+        dfPrices['chargeCondition'] = np.where((dfPrices['price'] < averagePrice*lowChargeLimit), True, False)
+        logger.info("Now prices retrieved for " + dayString)
+        logger.info("Average price is: €" + str(averagePrice))
 
     #Plot prices
     if plotImage:
@@ -164,13 +196,13 @@ def updateController():
         # If the ESS should charge do this:        
             if flagConntected:
                 client.publish("W/" + vrmID + "/settings/0/Settings/CGwacs/AcPowerSetPoint", '{"value":' + str(chargingGridSetpoint) + '}')
-                logger.info("Current price is €" + str(chargePriceNow) + ". The average price today is €" + str(averagePrice) + ". This is lower than " + str(lowChargeLimit) + " * daily average so the battery is now charging.")
+                logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is lower than " + str(lowChargeLimit) + " * daily average so the battery is now charging.")
                 lastChargeCondition = 1                
         else:
         # If the ESS should not charge do this:              
             if flagConntected:
                 client.publish("W/" + vrmID + "/settings/0/Settings/CGwacs/AcPowerSetPoint", '{"value":' + str(defaultGridSetpoint) + '}')
-                logger.info("Current price is €" + str(chargePriceNow) + ". The average price today is €" + str(averagePrice) + ". This is higher than " + str(lowChargeLimit) + " *  daily average. This is not low enough to start charging. ")
+                logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is higher than " + str(lowChargeLimit) + " *  daily average. This is not low enough to start charging. ")
                 lastChargeCondition = 0
         
         client.loop_stop()
