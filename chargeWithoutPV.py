@@ -126,6 +126,7 @@ def getPrices():
     
     # In case of ENTSOE
     if provider == 1:
+        from secret import entsoeKey
         fromDate = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
         tillDate = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)+timedelta(days=1)
         if dateToday == 0:
@@ -137,7 +138,7 @@ def getPrices():
         tillDateTZ = tillDateTZ.astimezone(pytz.utc)
         fromDateString = fromDateTZ.strftime("%Y%m%d%H%M")
         tillDateString = tillDateTZ.strftime("%Y%m%d%H%M")
-        url = "https://transparency.entsoe.eu/api?documentType=A44&in_Domain=10YNL----------L&out_Domain=10YNL----------L&periodStart="+fromDateString+"&periodEnd="+tillDateString+"&securityToken=7213ab85-4d23-4481-9dec-ae2bc2060592"
+        url = "https://transparency.entsoe.eu/api?documentType=A44&in_Domain=10YNL----------L&out_Domain=10YNL----------L&periodStart="+fromDateString+"&periodEnd="+tillDateString+"&securityToken=" + entsoeKey
         prices = requests.get(url)
         dict_data = xmltodict.parse(prices.content)
         dict_data["Publication_MarketDocument"]["TimeSeries"]["Period"]["Point"]
