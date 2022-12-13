@@ -73,7 +73,6 @@ client.username_pw_set(username, password)
 logzero.logfile("log.log", maxBytes=1e6, backupCount=3)
 
 # Calculate MQTT Broker URL
-
 def calculateBroker(vrmID):
     sum2 = 0
     for character in vrmID.lower().strip():
@@ -83,7 +82,6 @@ def calculateBroker(vrmID):
     return brokerURL
 
 # Retrieve ANWB prices
-
 def getPrices():
     # Retrieve prices
     global dfPrices, averagePrice
@@ -111,7 +109,7 @@ def getPrices():
     averagePrice = round(dfPrices["price"].mean()*100)/100
     dfPrices['chargeCondition'] = np.where((dfPrices['price'] < averagePrice*lowChargeLimit), True, False)
     logger.info("Now prices retrieved for " + dayString)
-    logger.info("Average price is: " + str(averagePrice))
+    logger.info("Average price is: €" + str(averagePrice))
 
     #Plot prices
     if plotImage:
@@ -127,7 +125,9 @@ def getPrices():
         plt.axhline(y=averagePrice, color="green")
         plt.axhline(y=averagePrice*lowChargeLimit, color="red")
         plt.legend(["Average", "Lower limit", "Charging hours"])
-        plt.savefig('plot.png')
+        timestr = time.strftime("%Y%m%d")
+        plt.savefig("plot-" + timestr + ".png")
+        logger.info("New plot created and saved. Filename:" + "plot-" + timestr + ".png")
 
 def updateController():
     global flagConntected, client, lastChargeCondition
