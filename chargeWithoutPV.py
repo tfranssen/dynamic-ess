@@ -131,15 +131,13 @@ def getPrices():
         plt.savefig('plot.png')
 
 def updateController():
-    global flagConntected, client
+    global flagConntected, client, lastChargeCondition
 
     # Find current price
     now = datetime.now().replace(microsecond=0, second=0, minute=0)
     nowTZ = now.astimezone(pytz.timezone(tz))
     chargeConditionNow = dfPrices["chargeCondition"].loc[dfPrices['localDate'] == nowTZ].item()
     chargePriceNow = dfPrices["price"].loc[dfPrices['localDate'] == nowTZ].item()
-
-
 
     # Wait for connecting
     while not flagConntected:
