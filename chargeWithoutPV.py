@@ -164,13 +164,13 @@ def updateController():
         # If the ESS should charge do this:        
             if flagConntected:
                 client.publish("W/" + vrmID + "/settings/0/Settings/CGwacs/AcPowerSetPoint", '{"value":' + str(chargingGridSetpoint) + '}')
-                logger.info("Current price is €" + str(chargePriceNow) + ". The average price today is €" + str(averagePrice) + ". This is lower then " + str(lowChargeLimit) + "* daily average so the battery is now charging.")
+                logger.info("Current price is €" + str(chargePriceNow) + ". The average price today is €" + str(averagePrice) + ". This is lower than " + str(lowChargeLimit) + " * daily average so the battery is now charging.")
                 lastChargeCondition = 1                
         else:
         # If the ESS should not charge do this:              
             if flagConntected:
                 client.publish("W/" + vrmID + "/settings/0/Settings/CGwacs/AcPowerSetPoint", '{"value":' + str(defaultGridSetpoint) + '}')
-                logger.info("Current price is €" + str(chargePriceNow) + ". The average price today is €" + str(averagePrice) + ". This is not low enough to start charging. ")
+                logger.info("Current price is €" + str(chargePriceNow) + ". The average price today is €" + str(averagePrice) + ". This is higher than " + str(lowChargeLimit) + " *  daily average. This is not low enough to start charging. ")
                 lastChargeCondition = 0
         
         client.loop_stop()
