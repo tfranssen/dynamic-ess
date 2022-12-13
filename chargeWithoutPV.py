@@ -66,7 +66,6 @@ client.on_connect = on_connect
 client.on_message = on_message
 client.on_publish = on_publish
 client.on_disconnect = on_disconnect
-print("Connecting to broker")
 client.tls_set("venus-ca.crt")
 client.username_pw_set(username, password)       
 
@@ -139,16 +138,16 @@ def updateController():
     chargeConditionNow = dfPrices["chargeCondition"].loc[dfPrices['localDate'] == nowTZ].item()
     chargePriceNow = dfPrices["price"].loc[dfPrices['localDate'] == nowTZ].item()
 
-    # Wait for connecting
-    while not flagConntected:
-        time.sleep(1)
-
     if chargeConditionNow != lastChargeCondition:
         logger.info("Requirement has changed, sending MQTT message to change setpoint.")
 
         # Control ESS over MQTT
         client.connect(calculateBroker(vrmID), 8883, keepalive=60)
         client.loop_start()
+
+        # Wait for connecting
+        while not flagConntected:
+            time.sleep(1)
 
         if chargeConditionNow:
         # If the ESS should charge do this:        
@@ -164,12 +163,15 @@ def updateController():
                 lastChargeCondition = 0
         
         client.loop_stop()
-    logger.info("Requirement has not changed. No MQTT message needed. ")        
+    logger.info("Requirement has not changed. No MQTT message needed. ")     
+
 # Set up scheduler
 schedule.every().day.at("00:00:05").do(getPrices)
 schedule.every(5).minutes.do(updateController)
+logger.info("Script started.")
 logger.info("Get prices is scheduled every day at 00:00:05.")
 logger.info("The ESS controller is scheduled every 5 minutes.")
+
 
 getPrices()
 updateController()
