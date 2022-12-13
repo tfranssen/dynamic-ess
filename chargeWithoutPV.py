@@ -28,7 +28,7 @@ from secret import password, vrmID, username
 lowChargeLimit = 0.8
 dateToday = 1; # If 1, date is today, if 0 date is tomorrow, for testing only
 tz = "Europe/Amsterdam" # Time zone
-plotImage = 0 # If true image get created
+plotImage = 1 # If true image get created
 defaultGridSetpoint = 30 # Default grid point (Watt)
 chargingGridSetpoint = 3000 # Charging grid point (Watt)
 lastChargeCondition = 0
@@ -89,24 +89,34 @@ def getPrices():
         dayString = "today"
     else:
         dayString = "tomorrow"
+    # Set dates of interest in correct format for API
     fromDate = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
     tillDate = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)+timedelta(days=1)-timedelta(seconds=1)
     if dateToday == 0:
         fromDate = fromDate+timedelta(days=1)
         tillDate = tillDate+timedelta(days=1)
+    # Add time zone info to dates    
     fromDateTZ = fromDate.astimezone(pytz.timezone(tz))
     fromDateTZ = fromDateTZ.astimezone(pytz.utc)
     tillDateTZ = tillDate.astimezone(pytz.timezone(tz))
     tillDateTZ = tillDateTZ.astimezone(pytz.utc)
+    # Reformat dates for correct format for API
     fromDateString = fromDateTZ.isoformat().replace("+00:00","Z")
     tillDateString = tillDateTZ.isoformat().replace("+00:00","Z")
+    # Build API URL
     url = "https://api.energyzero.nl/v1/energyprices?fromDate=" + fromDateString + "&tillDate=" + tillDateString + "&interval=4&usageType=1&inclBtw=true"
+    # Excecute API request
     prices = requests.get(url)
     pricesDoc = prices.json()
+    # Add prices to Pandas dataframe
     dfPrices = pd.DataFrame.from_dict(pricesDoc["Prices"])
+    # Convert strings to datetime
     dfPrices['readingDate'] = pd.to_datetime(dfPrices['readingDate'])
+    # Add timezone info to dates and calculate local times
     dfPrices['localDate'] = dfPrices['readingDate'].dt.tz_convert(tz)
+    # Calculate average price
     averagePrice = round(dfPrices["price"].mean()*100)/100
+    # Add column with charge condition based on lower limit.
     dfPrices['chargeCondition'] = np.where((dfPrices['price'] < averagePrice*lowChargeLimit), True, False)
     logger.info("Now prices retrieved for " + dayString)
     logger.info("Average price is: €" + str(averagePrice))
@@ -119,20 +129,21 @@ def getPrices():
         plt.bar(x,y, color=colors)
         plt.xlim(-1,24)
         plt.grid(1)
-        plt.title("Energy prices " + dayString + ". Mean price: €" + str(round(dfPrices["price"].mean()*100)/100))
+        timestr = time.strftime("%Y - %m - %d")
+        plt.title("Energy prices " + dayString + " " + timestr + ". Mean price: €" + str(round(dfPrices["price"].mean()*100)/100))
         plt.xlabel("Hour")
         plt.ylabel("Price (€)")
         plt.axhline(y=averagePrice, color="green")
         plt.axhline(y=averagePrice*lowChargeLimit, color="red")
-        plt.legend(["Average", "Lower limit", "Charging hours"])
+        plt.legend(["Average", "Lower limit: " + str(lowChargeLimit), "Charging hours"])
         timestr = time.strftime("%Y%m%d")
         plt.savefig("plot-" + timestr + ".png")
-        logger.info("New plot created and saved. Filename:" + "plot-" + timestr + ".png")
+        logger.info("New plot created and saved. Filename: " + "plot-" + timestr + ".png")
 
 def updateController():
     global flagConntected, client, lastChargeCondition
 
-    # Find current price
+    # Find current price and required charge condition
     now = datetime.now().replace(microsecond=0, second=0, minute=0)
     nowTZ = now.astimezone(pytz.timezone(tz))
     chargeConditionNow = dfPrices["chargeCondition"].loc[dfPrices['localDate'] == nowTZ].item()
