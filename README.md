@@ -69,6 +69,9 @@ I run the script at a Digital Ocean VPS on Ubuntu 22.04
 * `direction` Plane azimuth, -180 … 180 (-180 = north, -90 = east, 0 = south, 90 = west, 180 = north)
 * `totPower` Installed modules power in kilo watt
 
+### ENTSO-e API Access
+You need an ENTSO-e Restful API key if you want to collect the data from ENTSO-e. To request this API key, register on the Transparency Platform `https://transparency.entsoe.eu/` and send an email to `transparency@entsoe.eu` with `Restful API access` in the subject line. Indicate the email address you entered during registration in the email body.
+
 ### Schedule
 * Get prices is scheduled every day at 00:00:05.
 * The ESS controller is scheduled every 5 minutes. If the charge requirement did change an MQTT message will be published. Otherwise nothing will happen.
