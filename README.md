@@ -87,4 +87,4 @@ In the log below you can see in this case charging started just after 22:00. At 
 [...]
 [I 221215 06:04:40 chargeWithoutPV:153] Requirement has changed, sending MQTT message to change setpoint.
 [I 221215 06:04:40 chargeWithoutPV:173] Current price is €0.35. The average price today is €0.42. This is not low enough to start charging. 
-[I 221215 06:04:40 chargeWithoutPV:56] Message Published.```
+[I 221215 06:04:40 chargeWithoutPV:56] Message Published.
