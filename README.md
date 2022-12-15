@@ -19,7 +19,7 @@ The goal of this project is to develop a feature for Victron Energy to take into
 * Implement multiple charge scenarios 
   * ~~Simple charge when prices are X% lower then average~~ (done)
   * Always charge in X lowest tariff hours. (In this cases prices will be sorted in ascending order, first X hours will be used for charging)
-  * Above scenario's including PV forecast. SoC will be lower in the morning so there is capacity left for PV charging. 
+  * Above scenarios including PV forecast. SoC will be lower in the morning so there is capacity left for PV charging. 
 * Rewrite script as service
 * ~~Implement logging~~ (done)
 * ~~Implement scheduler~~ (done)
@@ -28,18 +28,26 @@ The goal of this project is to develop a feature for Victron Energy to take into
 * ~~Import forecast~~ (done)
 * ~~Include forecast in plot~~ (done)
 * Determine max SoC so there is capacity for PV energy
-  
-### Install (best to use in virtual env)
 
-1. Clone GIT project on a machine with Python 3 installed. 
-2. Install dependencies `pip3 install matplotlib numpy paho_mqtt pandas pytz requests logzero schedule xmltodict time` or use `pip3 install -r requirements.txt`
+### Install
+
+1. Clone GIT project on a machine with Python 3 installed `git clone https://github.com/tfranssen/dynamic-ess/`
+2. Move in directory `cd dynamic-ess/`
+
+### Install in virtual environment (recommended)
+
+1. Clone GIT project on a machine with Python 3 installed `git clone https://github.com/tfranssen/dynamic-ess/`
+2. Move in directory `cd dynamic-ess/`
+3. Make new virtual environment `python3 -m venv .venvDESS`
+4. Activate the virtual environment `source .venvDESS/bin/activate`
+5. Install dependencies `pip3 install -r requirements.txt`
 
 I run the script at a Digital Ocean VPS on Ubuntu 22.04
 
 ### Config
 
-1. Configure `secret.py`
-2. Configure settings in script as explained below
+1. Configure `secret.py` (for examply by using `nano secret.py`)
+2. Configure settings in script as described below
 
 ### Run 
 
@@ -63,10 +71,10 @@ I run the script at a Digital Ocean VPS on Ubuntu 22.04
 
 ### Schedule
 * Get prices is scheduled every day at 00:00:05.
-* The ESS controller is scheduled every 5 minutes. If the charge requirement did change an MQTT message will be published. Otherwise noting will happen.
+* The ESS controller is scheduled every 5 minutes. If the charge requirement did change an MQTT message will be published. Otherwise nothing will happen.
 
 ### Typical log file
-In the log below you can see in this case charging started just after 22:00. At 00:00:05 new prices were retrieved and charging stoped just after 06:00
+In the log below you can see in this case charging started just after 22:00. At 00:00:05 new prices were retrieved and charging stopped just after 06:00
 
 ```[I 221214 22:04:09 chargeWithoutPV:153] Requirement has changed, sending MQTT message to change setpoint.
 [I 221214 22:04:09 chargeWithoutPV:50] Broker connected.
