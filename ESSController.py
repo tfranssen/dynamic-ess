@@ -21,7 +21,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 from logzero import logger
 
-global dfPrices, flagConntected, lowChargeLimit, dateToday, tz, plotImage, defaultGridSetpoint, chargingGridSetpoint, password, vrmID, username, lastChargeCondition
+global dfPrices, flagConntected, lowChargeLimit, dateToday, tz, plotImage, defaultGridSetpoint, chargingGridSetpoint, password, vrmID, username, lastChargeCondition, PV, locLat, locLong, angle, direction , totPower
 from secret import password, vrmID, username
 
 # Settings
@@ -33,6 +33,14 @@ defaultGridSetpoint = 30 # Default grid point (Watt)
 chargingGridSetpoint = 3000 # Charging grid point (Watt)
 lastChargeCondition = 0
 provider = 1 #0 = ANWB, 1 = ENTSOE
+
+#PV Settings
+PV = 1 # if PV = 1, PV Aware charging is enabled. PV = 0 is off
+locLat = "51.33.36" #Latitude
+locLong = "5.5.60" #Longitude
+angle = 40 # Angle of your panels 0 (horizontal) … 90 (vertical)
+direction = 90 # Plane azimuth, -180 … 180 (-180 = north, -90 = east, 0 = south, 90 = west, 180 = north)
+totPower = 3 # installed modules power in kilo watt
 
 # Secrets
 # vrmID = "" # VRM ID, if not imported from secret.py put it here
@@ -109,8 +117,16 @@ def getPrices():
         # Build API URL
         url = "https://api.energyzero.nl/v1/energyprices?fromDate=" + fromDateString + "&tillDate=" + tillDateString + "&interval=4&usageType=1&inclBtw=true"
         # Excecute API request
-        prices = requests.get(url)
-        pricesDoc = prices.json()
+        try:
+            prices = requests.get(url)
+        except Exception as e:
+            logger.error("Can't retrieve prices.")
+            return
+        try:
+            pricesDoc = prices.json()
+        except Exception as e:
+            logger.exception(e)
+            logger.error("Can't retrieve prices.")
         # Add prices to Pandas dataframe
         dfPrices = pd.DataFrame.from_dict(pricesDoc["Prices"])
         # Convert strings to datetime
@@ -139,8 +155,16 @@ def getPrices():
         fromDateString = fromDateTZ.strftime("%Y%m%d%H%M")
         tillDateString = tillDateTZ.strftime("%Y%m%d%H%M")
         url = "https://transparency.entsoe.eu/api?documentType=A44&in_Domain=10YNL----------L&out_Domain=10YNL----------L&periodStart="+fromDateString+"&periodEnd="+tillDateString+"&securityToken=" + entsoeKey
-        prices = requests.get(url)
-        dict_data = xmltodict.parse(prices.content)
+        try:
+            prices = requests.get(url)
+        except Exception as e:
+            logger.error("Can't retrieve prices.")
+            return
+        try:
+            dict_data = xmltodict.parse(prices.content)
+        except Exception as e:
+            logger.exception(e)
+            logger.error("Can't retrieve prices.")
         dict_data["Publication_MarketDocument"]["TimeSeries"]["Period"]["Point"]
         dfPrices = pd.DataFrame.from_dict(dict_data["Publication_MarketDocument"]["TimeSeries"]["Period"]["Point"])
         dfPrices['localDate'] = pd.to_datetime(datetime.now().replace(microsecond=0, second=0, minute=0, hour=0), utc=True) + dfPrices.position.astype('timedelta64[h]')-timedelta(hours=2)
@@ -154,23 +178,59 @@ def getPrices():
         logger.info("Now prices retrieved for " + dayString)
         logger.info("Average price is: €" + str(averagePrice))
 
+    if PV:
+        url = "https://api.forecast.solar/estimate/"+str(locLat)+"/"+str(locLong)+"/"+str(angle)+"/"+str(direction)+"/"+str(totPower)+"?no_sun=1"
+        try:
+            pvInfo = requests.get(url)
+        except Exception as e:
+            logger.error("Can't retrieve PV info.")
+            return
+        try:
+            pvInfoDoc = pvInfo.json()
+        except Exception as e:
+            logger.error("Can't retrieve PV info.")
+            return
+        dfPVInfo = pd.DataFrame.from_dict(pvInfoDoc["result"]["watt_hours_period"],orient="index",columns=["wattHours"])
+        dfPVInfo.reset_index(inplace=True)
+        dfPVInfo.rename(columns={'index': 'date'}, inplace=True)
+        dfPVInfo['date'] = pd.to_datetime(dfPVInfo['date'])
+        dfPVInfo['date'] = dfPVInfo['date'].dt.tz_localize(tz)
+        tomorrowDT = datetime.now()+timedelta(days=1)
+        tomorrow = tomorrowDT.strftime("%Y-%m-%d")
+        dfPVInfo = dfPVInfo[(dfPVInfo['date'] < tomorrow)]
+        dfPrices = pd.merge(dfPrices, dfPVInfo, how='left', left_on="localDate", right_on="date")
+        dfPrices.drop(['date'], axis=1, inplace=True)
+
     #Plot prices
     if plotImage:
+        logger.info("Now Plotting")
         x = range(24)
         y = dfPrices.price.tolist()
+        fig, ax1 = plt.subplots() 
+        ax1.set_ylabel('Price (€)') 
         colors = ["red" if i <= averagePrice*lowChargeLimit else "blue" for i in y]
-        plt.bar(x,y, color=colors)
+        plot_1 = ax1.bar(x, y, color = colors) 
+        ax1.tick_params(axis ='y', labelcolor = 'black') 
         plt.xlim(-1,24)
         plt.grid(1)
-        timestr = time.strftime("%Y - %m - %d")
-        plt.title("Energy prices " + dayString + " " + timestr + ". Mean price: €" + str(round(dfPrices["price"].mean()*100)/100))
-        plt.xlabel("Hour")
-        plt.ylabel("Price (€)")
-        plt.axhline(y=averagePrice, color="green")
-        plt.axhline(y=averagePrice*lowChargeLimit, color="red")
-        plt.legend(["Average", "Lower limit: " + str(lowChargeLimit), "Charging hours"])
+        if dateToday:
+            dayString = "today"
+        else:
+            dayString = "tomorrow"
+        plt.title("Energy prices " + dayString + ". Mean price: €" + str(round(dfPrices["price"].mean()*100)/100))
+        ax1.axhline(y=averagePrice, color="green")
+        ax1.axhline(y=averagePrice*lowChargeLimit, color="red")
+        ax1.legend(["Average", "Lower limit", "Charging hours","Forecast"])
+        ax1.set_xlabel('Hour')     
+        if PV:
+            y2 = dfPrices.wattHours.tolist()                    
+            ax2 = ax1.twinx() 
+            ax2.set_ylabel('Energy (Wh)') 
+            plot_2 = ax2.plot(x, y2, color = 'yellow') 
+            ax2.tick_params(axis ='y')         
+            ax2.legend(["Forecast"])
         timestr = time.strftime("%Y%m%d")
-        plt.savefig("plot-" + timestr + ".png")
+        fig.savefig("plot-" + timestr + ".png")
         logger.info("New plot created and saved. Filename: " + "plot-" + timestr + ".png")
 
 def updateController():
@@ -225,5 +285,7 @@ def main():
         time.sleep(1)
 
 if __name__ == "__main__":
-    main()
-
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('Stop program')
