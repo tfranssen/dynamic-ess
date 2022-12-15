@@ -36,8 +36,8 @@ provider = 1 #0 = ANWB, 1 = ENTSOE
 
 #PV Settings
 PV = 0 # if PV = 1, PV Aware charging is enabled. PV = 0 is off
-locLat = "51.33.36" #Latitude
-locLong = "5.5.60" #Longitude
+locLat = "51.33.36" # Latitude
+locLong = "5.5.60" # Longitude
 angle = 40 # Angle of your panels 0 (horizontal) … 90 (vertical)
 direction = 90 # Plane azimuth, -180 … 180 (-180 = north, -90 = east, 0 = south, 90 = west, 180 = north)
 totPower = 3 # installed modules power in kilo watt
@@ -217,7 +217,8 @@ def getPrices():
             dayString = "today"
         else:
             dayString = "tomorrow"
-        plt.title("Energy prices " + dayString + ". Mean price: €" + str(round(dfPrices["price"].mean()*100)/100))
+        timestr = time.strftime("%Y - %m - %d")
+        plt.title("Energy prices " + dayString + " " + timestr + ". Mean price: €" + str(round(dfPrices["price"].mean()*100)/100))
         ax1.axhline(y=averagePrice, color="green")
         ax1.axhline(y=averagePrice*lowChargeLimit, color="red")
         ax1.legend(["Average", "Lower limit", "Charging hours","Forecast"])
