@@ -34,7 +34,9 @@ The goal of this project is to develop a feature for Victron Energy to take into
 1. Clone GIT project to local PC
 2. Install dependencies `pip3 install matplotlib numpy paho_mqtt pandas pytz requests logzero schedule xmltodict time`
 3. Configure `secret.py`
-4. Run script `python3 chargeWithoutPV.py` ~~or add it to your crontab to schedule the script~~ (not needed anymore)
+4. Run script `python3 ESSController.py` ~~or add it to your crontab to schedule the script~~ (not needed anymore). Use `nohup python3 -u ./ESSController.py >> output.log &` to run script in the background.
+
+I run the script at a Digital Ocean VPS.
 
 ### Config
 
@@ -54,11 +56,24 @@ The goal of this project is to develop a feature for Victron Energy to take into
 * `locLong` Longitude of PV installation
 * `angle` Angle of your panels 0 (horizontal) … 90 (vertical)
 * `direction` Plane azimuth, -180 … 180 (-180 = north, -90 = east, 0 = south, 90 = west, 180 = north)
-* `totPower` installed modules power in kilo watt
-
-
+* `totPower` Installed modules power in kilo watt
 
 ### Schedule
 * Get prices is scheduled every day at 00:00:05.
 * The ESS controller is scheduled every 5 minutes. If the charge requirement did change an MQTT message will be published. Otherwise noting will happen.
 
+### Typical log file
+In the log below you can see in this case charging started just after 22:00. At 00:00:05 new prices were retrieved and charging stoped just after 06:00
+
+```[I 221214 22:04:09 chargeWithoutPV:153] Requirement has changed, sending MQTT message to change setpoint.
+[I 221214 22:04:09 chargeWithoutPV:50] Broker connected.
+[I 221214 22:04:10 chargeWithoutPV:167] Current price is €0.38. The average price today is €0.48. This is lower then 0.8* daily average so the battery is now charging.
+[I 221214 22:04:10 chargeWithoutPV:56] Message Published.
+[...]
+[I 221215 00:00:06 chargeWithoutPV:121] Now prices retrieved for today
+[I 221215 00:00:06 chargeWithoutPV:122] Average price is: €0.42
+[I 221215 00:00:06 chargeWithoutPV:141] New plot created and saved. Filename: plot-20221215.png
+[...]
+[I 221215 06:04:40 chargeWithoutPV:153] Requirement has changed, sending MQTT message to change setpoint.
+[I 221215 06:04:40 chargeWithoutPV:173] Current price is €0.35. The average price today is €0.42. This is not low enough to start charging. 
+[I 221215 06:04:40 chargeWithoutPV:56] Message Published.```
