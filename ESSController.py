@@ -35,7 +35,7 @@ lastChargeCondition = 0
 provider = 1 #0 = ANWB, 1 = ENTSOE
 
 #PV Settings
-PV = 1 # if PV = 1, PV Aware charging is enabled. PV = 0 is off
+PV = 0 # if PV = 1, PV Aware charging is enabled. PV = 0 is off
 locLat = "51.33.36" #Latitude
 locLong = "5.5.60" #Longitude
 angle = 40 # Angle of your panels 0 (horizontal) … 90 (vertical)
