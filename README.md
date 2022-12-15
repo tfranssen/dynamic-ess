@@ -29,19 +29,22 @@ The goal of this project is to develop a feature for Victron Energy to take into
 * ~~Include forecast in plot~~ (done)
 * Determine max SoC so there is capacity for PV energy
   
-### Install
+### Install (best to use in virtual env)
 
-1. Clone GIT project to local PC
-2. Install dependencies `pip3 install matplotlib numpy paho_mqtt pandas pytz requests logzero schedule xmltodict time`
-3. Configure `secret.py`
-4. Run script `python3 ESSController.py` ~~or add it to your crontab to schedule the script~~ (not needed anymore). Use `nohup python3 -u ./ESSController.py >> output.log &` to run script in the background.
+1. Clone GIT project on a machine with Python 3 installed. 
+2. Install dependencies `pip3 install matplotlib numpy paho_mqtt pandas pytz requests logzero schedule xmltodict time` or use `pip3 install -r requirements.txt`
 
-I run the script at a Digital Ocean VPS.
+I run the script at a Digital Ocean VPS on Ubuntu 22.04
 
 ### Config
 
-1. Copy or rename the `secret.example.py` to `secret.py` and change it as you need it.
-2. Edit settings in script
+1. Configure `secret.py`
+2. Configure settings in script as explained below
+
+### Run 
+
+* Run script: `python3 ESSController.py` 
+* Run in background: `nohup python3 -u ./ESSController.py >> output.log &` 
 
 ### Settings
 * `lowChargeLimit` this is the threshold used to start charging. Default = 0.8, charging starts in this case 20% below daily average
