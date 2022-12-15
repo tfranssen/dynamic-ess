@@ -8,6 +8,10 @@ Work in progres.
 
 The goal of this project is to develop a feature for Victron Energy to take into account the dynamic tariff prices in the decision to store energy or to return energy to the grid. These dynamic tariff prices are nowadays offered by various energy providers (Easy Energy, ANWB, TIBR, and others) and are always announced a day in advance (also known as the day-ahead pricing model). The feature will control the grid setpoint as its main output. The goal is to implement this feature in VRM, the controller should run externally on PC, Raspberry Pi, or VPS.
 
+<p align="center">
+    <img src="https://github.com/tfranssen/dynamic-ess/raw/main/plot.png" width=40% height=40%>
+</p>
+
 ### To do
 * Retrieve prices from multiple energy providers:
   * ~~ANWB~~ (done)
