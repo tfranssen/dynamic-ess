@@ -22,7 +22,8 @@ The goal of this project is to develop a feature for Victron Energy to take into
 * ~~ADD MQTT functionality through VRM~~ (done)
 * Implement multiple charge scenarios 
   * ~~Simple charge when prices are X% lower then average~~ (done)
-  * Always charge in X lowest tariff hours. (In this cases prices will be sorted in ascending order, first X hours will be used for charging)
+  * ~~Simple charge when prices are X% lower then average, discharge when prices are X% higher then average ~~ (done)  
+  * ~~Always charge in X lowest tariff hours. (In this cases prices will be sorted in ascending order, first X hours will be used for charging)~~ (done)
   * Above scenarios including PV forecast. SoC will be lower in the morning so there is capacity left for PV charging. 
 * Rewrite script as service
 * ~~Implement logging~~ (done)
@@ -60,6 +61,8 @@ I run the script at a Digital Ocean VPS on Ubuntu 22.04
 
 ### Settings
 * `lowChargeLimit` this is the threshold used to start charging. Default = 0.8, charging starts in this case 20% below daily average
+* `highThreshold` = Constant to set the high threshold for selling. Default =1.2. Only used in Mode 2
+* `chargeHours` = Number of hours to charge during the cheapest hours. Only used in Mode 3
 * `dateToday` If 1, date is today, if 0 date is tomorrow, for testing only. Default is 1
 * `tz` Time zone, default is: "Europe/Amsterdam"
 * `plotImage` If 1 an image is plotted to show when charging will start
@@ -72,6 +75,11 @@ I run the script at a Digital Ocean VPS on Ubuntu 22.04
 * `angle` Angle of your panels 0 (horizontal) … 90 (vertical)
 * `direction` Plane azimuth, -180 … 180 (-180 = north, -90 = east, 0 = south, 90 = west, 180 = north)
 * `totPower` Installed modules power in kilo watt
+
+### Modes
+* 1 = Charge when current price < X average price
+* 2 = Charge when current price < X average price, discharge when price > X average price
+* 3 = Charge during cheapest x hours
 
 ### ENTSO-e API Access
 You need an ENTSO-e Restful API key if you want to collect the data from ENTSO-e. To request this API key, register on the Transparency Platform `https://transparency.entsoe.eu/` and send an email to `transparency@entsoe.eu` with `Restful API access` in the subject line. Indicate the email address you entered during registration in the email body.
