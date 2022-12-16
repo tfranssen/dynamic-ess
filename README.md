@@ -22,7 +22,7 @@ The goal of this project is to develop a feature for Victron Energy to take into
 * ~~ADD MQTT functionality through VRM~~ (done)
 * Implement multiple charge scenarios 
   * ~~Simple charge when prices are X% lower then average~~ (done)
-  * ~~Simple charge when prices are X% lower then average, discharge when prices are X% higher then average ~~ (done)  
+  * ~~Simple charge when prices are X% lower then average, discharge when prices are X% higher then average~~ (done)
   * ~~Always charge in X lowest tariff hours. (In this cases prices will be sorted in ascending order, first X hours will be used for charging)~~ (done)
   * Above scenarios including PV forecast. SoC will be lower in the morning so there is capacity left for PV charging. 
 * Rewrite script as service
