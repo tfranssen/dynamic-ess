@@ -43,7 +43,7 @@ password = base64.b64decode(password).decode("utf-8") # Retrieve password from s
 
 # Buy & sell modes
 # 1 = Charge when current price < X average price
-# 2 = Charge when current price < X average price
+# 2 = Charge when current price < X average price, discharge when price > X average price
 # 3 = Charge during cheapest x hours
 chargeMode = 3
 # Mode 1 settings
@@ -51,7 +51,7 @@ lowThreshold = 0.8 # Constant to set the low threshold for charging
 # Mode 2 settings
 highThreshold = 1.2 # Constant to set the high threshold for selling
 # Mode 3 settings
-chargeHours = 5
+chargeHours = 3
 
 #PV Settings
 PV = 1 # if PV = 1, PV Aware charging is enabled. PV = 0 is off
