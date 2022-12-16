@@ -45,7 +45,7 @@ password = base64.b64decode(password).decode("utf-8") # Retrieve password from s
 # 1 = Charge when current price < X average price
 # 2 = Charge when current price < X average price, discharge when price > X average price
 # 3 = Charge during cheapest x hours
-chargeMode = 3
+chargeMode = 1
 # Mode 1 settings
 lowThreshold = 0.8 # Constant to set the low threshold for charging
 # Mode 2 settings
@@ -54,7 +54,7 @@ highThreshold = 1.2 # Constant to set the high threshold for selling
 chargeHours = 3
 
 #PV Settings
-PV = 1 # if PV = 1, PV Aware charging is enabled. PV = 0 is off
+PV = 0 # if PV = 1, PV Aware charging is enabled. PV = 0 is off
 locLat = "51.33.36" # Latitude
 locLong = "5.5.60" # Longitude
 angle = 40 # Angle of your panels 0 (horizontal) … 90 (vertical)
