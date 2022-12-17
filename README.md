@@ -26,6 +26,7 @@ The goal of this project is to develop a feature for Victron Energy to take into
   * ~~Always charge in X lowest tariff hours. (In this cases prices will be sorted in ascending order, first X hours will be used for charging)~~ (done)
   * Above scenarios including PV forecast. SoC will be lower in the morning so there is capacity left for PV charging. 
 * Rewrite script as service
+* Add SoC limits for charge and discharge
 * ~~Implement logging~~ (done)
 * ~~Implement scheduler~~ (done)
 * ~~Implement PV forecast~~ (done)
