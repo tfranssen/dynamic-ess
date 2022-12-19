@@ -49,17 +49,17 @@ chargeMode = 1
 # Mode 1 settings
 lowThreshold = 0.8 # Constant to set the low threshold for charging
 # Mode 2 settings
-highThreshold = 1.2 # Constant to set the high threshold for selling
+highThreshold = 1.4 # Constant to set the high threshold for selling
 # Mode 3 settings
 chargeHours = 3
 
 #PV Settings
-PV = 0 # if PV = 1, PV Aware charging is enabled. PV = 0 is off
+PV = 1 # if PV = 1, PV Aware charging is enabled. PV = 0 is off
 locLat = "51.33.36" # Latitude
 locLong = "5.5.60" # Longitude
 angle = 40 # Angle of your panels 0 (horizontal) … 90 (vertical)
 direction = 90 # Plane azimuth, -180 … 180 (-180 = north, -90 = east, 0 = south, 90 = west, 180 = north)
-totPower = 3 # installed modules power in kilo watt
+totPower = 1 # installed modules power in kilo watt
 
 # Set up MQTT Broker
 global client 
@@ -266,9 +266,9 @@ def getPrices():
             ax2.set_ylabel('Energy (Wh)') 
             plot_2 = ax2.plot(x, y2, color = 'yellow') 
             ax2.tick_params(axis ='y')         
-            line3 = Line2D([0], [0], label='Forecast' , color='yellow')      
+            line3 = Line2D([0], [0], label='PV forecast: ' + str(round((dfPVInfo["wattHours"].sum()/1000)*100)/100) + " kWh", color='yellow')      
             handles.extend([line3])
-        ax1.legend(handles=handles, loc="lower left")
+        ax1.legend(handles=handles, loc="best")
         timestr = time.strftime("%Y%m%d")
         fig.savefig("plot-" + timestr + ".png")
         logger.info("New plot created and saved. Filename: " + "plot-" + timestr + ".png")
