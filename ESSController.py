@@ -3,14 +3,14 @@
 
 # Simple script for charging battery when prices are low
 # In this scenario the battery will be charged when prices are x percent below the dialy average. 
-# The limit can be set by the lowThreshold variable. 
+# The limit can be set by the lowThreshold variable.
 # Default is 0.8, which means that charging will start when current price is 20% below the daily average. 
 #
 # To get this script working you need to provide (best to edit the secret.py file):
 #  * vrmID
 #  * password
 #  * username
-#  
+#
 #  Retrieving data is now only available for ANWB, other providers will be added later. 
 
 import requests, datetime, pytz, base64, time, logzero, schedule, xmltodict
@@ -101,6 +101,46 @@ def calculateBroker(vrmID):
     broker_index = sum2 % 128
     brokerURL = "mqtt{}.victronenergy.com".format(broker_index)
     return brokerURL
+
+def setDefaultSetpoint():
+    global defaultGridSetpoint, lastChargeCondition, lastDischargeCondition
+    logger.info("Set default setpoint: " + str(defaultGridSetpoint) + " watt")
+    # Control ESS over MQTT
+    client.connect(calculateBroker(vrmID), 8883, keepalive=60)
+    client.loop_start()
+    # Wait for connecting
+    while not flagConntected:
+        time.sleep(1)
+    client.publish("W/" + vrmID + "/settings/0/Settings/CGwacs/AcPowerSetPoint", '{"value":' + str(defaultGridSetpoint) + '}')
+    lastChargeCondition = 0
+    lastDischargeCondition = 0    
+    client.loop_stop()
+
+def setChargeSetpoint():
+    global chargingGridSetpoint, lastChargeCondition
+    logger.info("Set charge setpoint: " + str(chargingGridSetpoint) + " watt")
+    # Control ESS over MQTT
+    client.connect(calculateBroker(vrmID), 8883, keepalive=60)
+    client.loop_start()
+    # Wait for connecting
+    while not flagConntected:
+        time.sleep(1)
+    client.publish("W/" + vrmID + "/settings/0/Settings/CGwacs/AcPowerSetPoint", '{"value":' + str(chargingGridSetpoint) + '}')
+    lastChargeCondition = 1
+    client.loop_stop()  
+
+def setDishargeSetpoint():
+    global chargingGridSetpoint, lastDischargeCondition
+    logger.info("Set discharge setpoint: " + str(-1*chargingGridSetpoint) + " watt")
+    # Control ESS over MQTT
+    client.connect(calculateBroker(vrmID), 8883, keepalive=60)
+    client.loop_start()
+    # Wait for connecting
+    while not flagConntected:
+        time.sleep(1)
+    client.publish("W/" + vrmID + "/settings/0/Settings/CGwacs/AcPowerSetPoint", '{"value":' + str(-1*chargingGridSetpoint) + '}')
+    lastDischargeCondition = 1
+    client.loop_stop()   
 
 # Init misc vars
 lastChargeCondition = 0
@@ -302,54 +342,34 @@ def updateController():
     if chargeMode == 1 or 2 or 3:
         if chargeConditionNow != lastChargeCondition:
             logger.info("Requirement has changed, sending MQTT message to change setpoint.")
-            # Control ESS over MQTT
-            client.connect(calculateBroker(vrmID), 8883, keepalive=60)
-            client.loop_start()
-            # Wait for connecting
-            while not flagConntected:
-                time.sleep(1)
             if chargeConditionNow:
             # If the ESS should charge do this:        
-                if flagConntected:
-                    client.publish("W/" + vrmID + "/settings/0/Settings/CGwacs/AcPowerSetPoint", '{"value":' + str(chargingGridSetpoint) + '}')
-                    logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is lower than " + str(lowThreshold) + " * daily average so the battery is now charging.")
-                    lastChargeCondition = 1                
+                setChargeSetpoint()
+                logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is lower than " + str(lowThreshold) + " * daily average so the battery is now charging.")
+                lastChargeCondition = 1                
             else:
             # If the ESS should not charge do this:              
-                if flagConntected:
-                    client.publish("W/" + vrmID + "/settings/0/Settings/CGwacs/AcPowerSetPoint", '{"value":' + str(defaultGridSetpoint) + '}')
-                    logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is higher than " + str(lowThreshold) + " *  daily average. This is not low enough to start charging or discharging. ")
-                    lastChargeCondition = 0
-            
-            client.loop_stop()
+                setDefaultSetpoint()
+                logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". Default setpoint is set. ")
+                lastChargeCondition = 0
         else:
             logger.info("Charge requirement has not changed. No MQTT message needed. ")
 
     if chargeMode == 2:
         if dischargeConditionNow != lastDischargeCondition:
             logger.info("Requirement has changed, sending MQTT message to change setpoint.")
-            # Control ESS over MQTT
-            client.connect(calculateBroker(vrmID), 8883, keepalive=60)
-            client.loop_start()
-            # Wait for connecting
-            while not flagConntected:
-                time.sleep(1)
             if dischargeConditionNow:
             # If the ESS should charge do this:        
-                if flagConntected:
-                    client.publish("W/" + vrmID + "/settings/0/Settings/CGwacs/AcPowerSetPoint", '{"value":' + str(-1*chargingGridSetpoint) + '}')
-                    logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is higher than " + str(highThreshold) + " * daily average so the battery is now discharging.")
-                    lastDischargeCondition = 1                
+                setDishargeSetpoint()
+                logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is higher than " + str(highThreshold) + " * daily average so the battery is now discharging.")
+                lastDischargeCondition = 1                
             else:
             # If the ESS should not charge do this:              
-                if flagConntected:
-                    client.publish("W/" + vrmID + "/settings/0/Settings/CGwacs/AcPowerSetPoint", '{"value":' + str(defaultGridSetpoint) + '}')
-                    logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is higher than " + str(lowThreshold) + " *  daily average. This is not low enough to start charging or discharging. ")
-                    lastDischargeCondition = 0
-            
-            client.loop_stop()
+                setDefaultSetpoint()
+                logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". Default setpoint is set. ")
+                lastDischargeCondition = 0
         else:
-            logger.info("Discharge requirement has not changed. No MQTT message needed. ")           
+            logger.info("Discharge requirement has not changed. No MQTT message needed. ")
 
 # Set up scheduler
 schedule.every().day.at("00:00:05").do(getPrices)
@@ -360,6 +380,7 @@ logger.info("The ESS controller is scheduled every 5 minutes.")
 
 getPrices()
 updateController()
+setDefaultSetpoint()
 
 def main():
     while True:
