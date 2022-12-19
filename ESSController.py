@@ -27,7 +27,7 @@ global dfPrices, flagConntected, lowThreshold, highThreshold, dateToday, tz, plo
 from secret import password, vrmID, username
 
 # Settings
-dateToday = 0; # If 1, date is today, if 0 date is tomorrow, for testing only
+dateToday = 1; # If 1, date is today, if 0 date is tomorrow, for testing only
 tz = "Europe/Amsterdam" # Time zone
 plotImage = 1 # If true image get created
 defaultGridSetpoint = 30 # Default grid point (Watt)
