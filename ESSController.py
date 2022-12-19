@@ -27,7 +27,7 @@ global dfPrices, flagConntected, lowThreshold, highThreshold, dateToday, tz, plo
 from secret import password, vrmID, username
 
 # Settings
-dateToday = 1; # If 1, date is today, if 0 date is tomorrow, for testing only
+dateToday = 0; # If 1, date is today, if 0 date is tomorrow, for testing only
 tz = "Europe/Amsterdam" # Time zone
 plotImage = 1 # If true image get created
 defaultGridSetpoint = 30 # Default grid point (Watt)
@@ -47,7 +47,7 @@ password = base64.b64decode(password).decode("utf-8") # Retrieve password from s
 # 3 = Charge during cheapest x hours
 chargeMode = 1
 # Mode 1 settings
-lowThreshold = 0.8 # Constant to set the low threshold for charging
+lowThreshold = 0.6 # Constant to set the low threshold for charging
 # Mode 2 settings
 highThreshold = 1.4 # Constant to set the high threshold for selling
 # Mode 3 settings
