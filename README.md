@@ -60,6 +60,16 @@ I run the script at a Digital Ocean VPS on Ubuntu 22.04
 * Run script: `python3 ESSController.py` 
 * Run in background: `nohup python3 -u ./ESSController.py >> output.log &` 
 
+### Kill process
+* Run `ps -fA | grep python` and search for your proces
+* Kill proces with `kill <<<PROCES NR>>>`
+
+### Logging
+* Follow the log file by using `tail log.log -f -n 50`
+* `-n 50` is the number of visible rows
+* `-f` is to follow the log file
+
+
 ### Settings
 * `lowChargeLimit` this is the threshold used to start charging. Default = 0.8, charging starts in this case 20% below daily average
 * `highThreshold` = Constant to set the high threshold for selling. Default =1.2. Only used in Mode 2
