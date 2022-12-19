@@ -345,13 +345,11 @@ def updateController():
             if chargeConditionNow:
             # If the ESS should charge do this:        
                 setChargeSetpoint()
-                logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is lower than " + str(lowThreshold) + " * daily average so the battery is now charging.")
-                lastChargeCondition = 1                
+                logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is lower than " + str(lowThreshold) + " * daily average so the battery is now charging.")         
             else:
             # If the ESS should not charge do this:              
                 setDefaultSetpoint()
                 logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". Default setpoint is set. ")
-                lastChargeCondition = 0
         else:
             logger.info("Charge requirement has not changed. No MQTT message needed. ")
 
@@ -359,15 +357,13 @@ def updateController():
         if dischargeConditionNow != lastDischargeCondition:
             logger.info("Requirement has changed, sending MQTT message to change setpoint.")
             if dischargeConditionNow:
-            # If the ESS should charge do this:        
+            # If the ESS should discharge do this:        
                 setDishargeSetpoint()
-                logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is higher than " + str(highThreshold) + " * daily average so the battery is now discharging.")
-                lastDischargeCondition = 1                
+                logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". This is higher than " + str(highThreshold) + " * daily average so the battery is now discharging.")            
             else:
-            # If the ESS should not charge do this:              
+            # If the ESS should not discharge do this:              
                 setDefaultSetpoint()
                 logger.info("Current price is €" + '%.2f' % chargePriceNow + ". The average price today is €" + '%.2f' % averagePrice + ". Default setpoint is set. ")
-                lastDischargeCondition = 0
         else:
             logger.info("Discharge requirement has not changed. No MQTT message needed. ")
 
