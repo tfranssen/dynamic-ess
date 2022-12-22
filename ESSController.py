@@ -391,3 +391,6 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         print('Stop program')
+    except Exception as e:
+        print('Program crashed')
+        logger.exception(e)
